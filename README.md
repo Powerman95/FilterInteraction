@@ -1,2 +1,4 @@
 # FilterInteraction
-Simulate the interaction between a power converter and a filter using Scilab
+Simulate the interaction between a power converter and a filter using Scilab.
+
+The readme file is hereby updated.
