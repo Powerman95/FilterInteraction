@@ -1,7 +1,6 @@
 // This file will eventually become a filter interaction simulation.
 //  For now, it will test the github.
 // To run on linux, type :!scilab-cli -f %
-// To run on windows, type !C:\"Program Files"\scilab-5.5.1\bin\scilex  -nwni -f %
 // Added a line. 11/2/2015
 printf("What hath God wrought.\n");
 L=1;
