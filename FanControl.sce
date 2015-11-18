@@ -1,22 +1,4 @@
 //  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
-//  This file generates the control matrices for the fan control on the Subarc Turbo product.
 //----------------------------------------------------------------------------------------
 //  The line below (without the beginning slashes)  executes this script from 
 //  the vim command line.  
@@ -25,7 +7,7 @@
 //     !C:\"Program Files"\scilab-5.5.1\bin\scilex  -nw -f %
 s         = %s;               //SciLAB overhead
 z         = %z;               //SciLAB overhead
-Tsamp     = 12.5e-6;          //Sample Period
+Tsamp     = 100e-9;          //Sample Period
 L         = 33.7e-6;          //first guess at output inductance.
 Cf        = 880e-6;           //Capacitor size.
 R         = 28.0;             // Estimated load resistance.
@@ -41,14 +23,13 @@ w0        = 1/sqrt(L*Cf);
 //
 //----------------------------------------------------------------------------------------
 
-Kp        = 50;
+Kp        = 1000;
 p1        = 24;
 z1        = w0/5;
 z2        = w0/10;
 p2        = w0*8;
 p3        = w0*20;
 Gc        = Kp* (1+s/z1)*(1+s/z2)/((1+s/p1)*(1+s/p2)*(1+s/p3));
-Gc_old    = 1000* (1+s/z1)*(1+s/z2)/((s)*(1+s/p2)*(1+s/p3));
 //  The next several lines apply linear transformations to
 //  the system in order to make calculations easier later on.
 Gss       = tf2ss(Gc);       //Convert to state space
@@ -57,10 +38,10 @@ Gss(7)    = 'c'
 [A,P]     = bdiag(Gss(2));    //diagonalize the A matrix   
 B         = inv(P)*B;         //P is the linear transformation matrix.
 C         = C*P;
-//P2        = diag(ones(C)./C); //P2: linear transformation so C is all ones.
-//A         = inv(P2)*A*P2;     //Transform A
-//B         = inv(P2)*B;        //Transform B for consistency.
-//C         = C*P2;
+P2        = diag(2*ones(C)./C); //P2: linear transformation so C is all ones.
+A         = inv(P2)*A*P2;     //Transform A
+B         = inv(P2)*B;        //Transform B for consistency.
+C         = C*P2;
 Gs2       = syslin('c',A,B,C,D); //Use the new linear system for further investigation.
 f         = logspace(-1,5,1000);
 
@@ -69,14 +50,9 @@ mfprintf(outputfile,".param a11=%f, a22=%f, a33=%f \n", A(1,1),A(2,2),A(3,3))
 mfprintf(outputfile,".param b11=%f, b21=%f, b31=%f \n",B(1),B(2),B(3))
 mfprintf(outputfile,".param c11=%f, c12=%f, c13=%f d=%f \n",C(1),C(2),C(3),D)
 
-bode(Gss,f);       //These commented lines were used to verify that Gc= Gc2
-xset('window',2);
-Gs_old=tf2ss(Gc_old)
-Gs_old(7)='c'
-bode(Gs_old,f);
-
-
-//bode(Gs2,f)
+// Uncomment these lines to get a bode plot of the continuous time function
+bode(Gs2,f);       //These commented lines were used to verify that Gc= Gc2
+//xset('window',2);
 
 //----------------------------------------------------------------------------------------
 //  Now convert Gc to discrete time state space system Gcz.
@@ -164,7 +140,7 @@ Xnew = A*X + B*u
 Xnew = min(Xnew,ones(Xnew)*2^19)  //Clamp Xnew to upper limit
 Xnew(3) = max(Xnew(3),(-100000))
 ynew = (C*Xnew+D*u)/1024 + ref*1.25;
-disp(Xnew)
+//disp(Xnew)
 printf("U calculated %f \n",u)
 printf("The new y value is %f\n",ynew)
 
